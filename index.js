@@ -172,13 +172,31 @@ Game.prototype.toString = function() {
     return output;
 };
 
+//****************CONTROLLER************************* */
+function Controller(model) {
+    this.model = model;
+}
+
+Controller.prototype.handleNextGen = function(event) {
+    this.model.turn();
+    //event.preventDefault();
+    console.log(this.model.toString());
+};
+
 
 //**************************PROGRAM********************** */
 
 
 
 //test
-const game = new Game(3, 3);
+const game = new Game(10, 3);
 console.log(game.toString());
 game.turn();
 console.log(game.toString());
+
+//test controller
+const controller = new Controller(game);
+const nextGenBut = document.querySelector("#next");
+nextGenBut.addEventListener("click", event => {
+    controller.handleNextGen(event);
+});
