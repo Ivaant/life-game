@@ -175,12 +175,26 @@ Game.prototype.toString = function() {
 //****************CONTROLLER************************* */
 function Controller(model) {
     this.model = model;
+    this.timer = null;
 }
 
 Controller.prototype.handleNextGen = function(event) {
     this.model.turn();
     //event.preventDefault();
     console.log(this.model.toString());
+};
+
+Controller.prototype.start = function() {
+    this.timer = setInterval(() => {
+        this.handleNextGen(event);
+    }, 2000);
+};
+
+Controller.prototype.stop = function() {
+    if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+    }
 };
 
 
@@ -199,4 +213,14 @@ const controller = new Controller(game);
 const nextGenBut = document.querySelector("#next");
 nextGenBut.addEventListener("click", event => {
     controller.handleNextGen(event);
+});
+
+const startBut = document.querySelector("#start");
+startBut.addEventListener("click", event => {
+    controller.start();
+});
+
+const stopBut = document.querySelector("#stop");
+stopBut.addEventListener("click", event => {
+    controller.stop();
 });
