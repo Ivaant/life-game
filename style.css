@@ -1,0 +1,23 @@
+body {
+    min-height: 90vh;
+    background: linear-gradient(#00ac72, #00ff00);
+}
+
+h1 {
+    color: #91ebcd;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+}
+
+main {
+    margin: 10px auto;
+    border: solid 1px black;
+    text-align: center;
+}
+
+#display {
+    width: 500px;
+    height: 300px;
+    margin: 10px auto;
+    border: dashed 1px green;
+}
