@@ -83,6 +83,10 @@ Grid.prototype.valueAt = function(point) {
 Grid.prototype.setValueAt = function(point, value) {
     this.cells[point.y * this.width + point.x] = value;
 };
+
+Grid.prototype.setValueByIndex = function(index, value) {
+    this.cells[index] = value;
+}
 Grid.prototype.isInside = function(point) {
     return point.x >= 0 && point.y >= 0 &&
         point.x < this.width && point.y < this.height;
@@ -146,6 +150,7 @@ function Game(width, height) {
         grid.setValueAt(point, value);
     });
     this.grid = grid;
+    this.observers = [];
 }
 
 Game.prototype.turn = function() {
@@ -158,6 +163,7 @@ Game.prototype.turn = function() {
         nextGrid.setValueAt(point, grid.calculateLife(point));
     });
     this.grid = Object.create(nextGrid);
+    this.notifyObservers();
 };
 
 Game.prototype.toString = function() {
@@ -172,11 +178,50 @@ Game.prototype.toString = function() {
     return output;
 };
 
+Game.prototype.setValueByIndex = function(index, value) {
+    this.grid.setValueByIndex(index, value);
+    this.notifyObservers();
+};
+
+Game.prototype.subscribe = function(observer) {
+    this.observers.push(observer);
+};
+
+Game.prototype.unsubscribe = function(observer) {
+    const obsIndex = this.observers.indexOf(observer);
+    if (obsIndex > -1)
+        this.observers.splice(obsIndex, 1);
+};
+
+Game.prototype.notifyObservers = function() {
+    this.observers.forEach(o => o.update());
+};
+
 //****************CONTROLLER************************* */
 function Controller(model) {
     this.model = model;
     this.timer = null;
+    this.nextGenBut, this.startBut, this.stopBut;
+    this.subscribeHandlers();
 }
+
+Controller.prototype.subscribeHandlers = function() {
+
+    this.nextGenBut = document.querySelector("#next");
+    this.nextGenBut.addEventListener("click", event => {
+        this.handleNextGen(event);
+    });
+
+    this.startBut = document.querySelector("#start");
+    this.startBut.addEventListener("click", event => {
+        this.start();
+    });
+
+    this.stopBut = document.querySelector("#stop");
+    this.stopBut.addEventListener("click", event => {
+        this.stop();
+    });
+};
 
 Controller.prototype.handleNextGen = function(event) {
     this.model.turn();
@@ -184,10 +229,14 @@ Controller.prototype.handleNextGen = function(event) {
     console.log(this.model.toString());
 };
 
+Controller.prototype.handleCheckbox = function(checkboxElem) {
+    this.model.setValueByIndex(checkboxElem.id, checkboxElem.checked);
+};
+
 Controller.prototype.start = function() {
     this.timer = setInterval(() => {
         this.handleNextGen(event);
-    }, 2000);
+    }, 1000);
 };
 
 Controller.prototype.stop = function() {
@@ -197,30 +246,53 @@ Controller.prototype.stop = function() {
     }
 };
 
+//**************************VIEW************************* */
+
+function View(model, controller) {
+    this.model = model;
+    this.model.subscribe(this);
+    this.controller = controller;
+}
+
+View.prototype.update = function() {
+    const modelState = this.model.toString().split("");
+    this.display(modelState);
+};
+
+View.prototype.display = function(stateArray) {
+    let counter = 0;
+    const display = document.querySelector("#display");
+    while (display.firstChild)
+        display.removeChild(display.firstChild);
+    stateArray.forEach(elem => {
+        if (elem === "\n") {
+            const breakElem = document.createElement("br");
+            display.appendChild(breakElem);
+        } else {
+            const chkbElem = document.createElement("input");
+            chkbElem.type = "checkbox";
+            chkbElem.id = counter++;
+            if (elem === "+") {
+                chkbElem.checked = true;
+            } else {
+                chkbElem.removeAttribute("checked");
+            }
+            chkbElem.onclick = event => {
+                const checkboxElem = event.target;
+                this.controller.handleCheckbox(checkboxElem);
+            };
+            display.appendChild(chkbElem);
+        }
+    });
+};
+
+
+
 
 //**************************PROGRAM********************** */
+const game = new Game(15, 15);
 
-
-
-//test
-const game = new Game(10, 3);
-console.log(game.toString());
-game.turn();
-console.log(game.toString());
-
-//test controller
 const controller = new Controller(game);
-const nextGenBut = document.querySelector("#next");
-nextGenBut.addEventListener("click", event => {
-    controller.handleNextGen(event);
-});
 
-const startBut = document.querySelector("#start");
-startBut.addEventListener("click", event => {
-    controller.start();
-});
-
-const stopBut = document.querySelector("#stop");
-stopBut.addEventListener("click", event => {
-    controller.stop();
-});
+const view = new View(game, controller);
+view.update();
