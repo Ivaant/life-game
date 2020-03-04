@@ -145,13 +145,20 @@ Grid.prototype.toString = function() {
 
 function Game(width, height) {
     let grid = new Grid(width, height);
+    this.grid = grid;
+    this.populate();
+    this.observers = [];
+}
+
+Game.prototype.populate = function() {
+    let grid = this.grid;
     grid.each((point) => {
         const value = Math.random() > 0.5 ? true : false;
         grid.setValueAt(point, value);
     });
-    this.grid = grid;
-    this.observers = [];
-}
+    if (this.observers && this.observers.length)
+        this.notifyObservers();
+};
 
 Game.prototype.turn = function() {
     // const grid = JSON.parse(JSON.stringify(this.grid));
@@ -207,6 +214,11 @@ function Controller(model) {
 
 Controller.prototype.subscribeHandlers = function() {
 
+    this.populateBut = document.querySelector("#populate");
+    this.populateBut.addEventListener("click", event => {
+        this.handlePopulate(event);
+    });
+
     this.nextGenBut = document.querySelector("#next");
     this.nextGenBut.addEventListener("click", event => {
         this.handleNextGen(event);
@@ -223,10 +235,12 @@ Controller.prototype.subscribeHandlers = function() {
     });
 };
 
+Controller.prototype.handlePopulate = function(event) {
+    this.model.populate();
+}
+
 Controller.prototype.handleNextGen = function(event) {
     this.model.turn();
-    //event.preventDefault();
-    console.log(this.model.toString());
 };
 
 Controller.prototype.handleCheckbox = function(checkboxElem) {
