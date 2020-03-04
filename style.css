@@ -5,7 +5,7 @@
 
 body {
     min-height: 85vh;
-    background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(./images/seefromthesky.jpg);
+    background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url(./images/seefromthesky.jpg);
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -15,7 +15,6 @@ body {
 h1 {
     margin: 15px auto;
     color: #63DCE0;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
     text-align: center;
     text-shadow: 2px 2px 1px #0E5E61;
 }
@@ -65,7 +64,6 @@ button {
     padding: 10px;
     font-weight: 700;
     font-size: 2rem;
-    //line-height: 4rem;
     color: #0E5E61;
     background: linear-gradient(#63DCE0, #159094);
     border: none;
